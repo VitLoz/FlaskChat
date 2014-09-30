@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+
+{% block links %}
+
+{% endblock %}
+
+{% block alert_type %}
+{% if alert_type == 0 %}
+
+{% for message in get_flashed_messages() %}
+   <div class="alert  alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <center><b>{{ message }}</b></center>
+      </div>
+{% endfor %}
+
+{% elif alert_type == 1 %}
+
+{% for message in get_flashed_messages() %}
+   <div class="alert alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <center><b>{{ message }}</b></center>
+   </div>
+{% endfor %}
+
+{% else %}
+
+{# Yellow warning to process login manager warnings #}
+
+{% for message in get_flashed_messages() %}
+   <div class="alert  alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <center><b>{{ message }}</b></center>
+      </div>
+{% endfor %}
+
+{% endif %}
+
+
+{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+<h4>
+
+<table width="500" height="500" align="center">
+<tr>
+ <td> {{ wtf.quick_form(form) }} 
+ <br /><h4><a href="{{ url_for('register') }}">[ Register ]</a></h4></td>
+</tr>
+</table>
+
+</h4>
+</div>
+{% endblock %}

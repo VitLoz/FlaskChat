@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Sudoku - Internal Server Error{% endblock %}
+{% block links %}
+<li><a href="{{ url_for('easy') }}">[ Easy ]</a></li>
+<li><a href="{{ url_for('normal') }}">[ Normal ]</a></li>
+<li><a href="{{ url_for('hard') }}">[ Hard ]</a></li>
+<li><a href="{{ url_for('evil') }}">[ Evil ]</a></li>
+{% endblock %}
+{% block page_content %}
+<div class="page-header">
+    <h3>Internal Server Error</h3>
+</div>
+{% endblock %}

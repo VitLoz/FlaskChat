@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block alert_type %}
+{% if alert_type == 1 %}
+
+{% for message in get_flashed_messages() %}
+   <div class="alert alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <center><b>{{ message }}</b></center>
+   </div>
+{% endfor %}
+
+
+{% elif alert_type == 2 %}
+
+{% for message in get_flashed_messages() %}
+   <div class="alert  alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <center><b>{{ message }}</b></center>
+      </div>
+{% endfor %}
+
+
+{% endif %}
+{% endblock %}
+
+{% block search_result %}
+   {% if findChannelsRes.count() > 0 %}
+    <!-- Modal For Chat Channel Search Results-->
+            <div class="modal fade" id="searchResults" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Search Results</h4>
+                      </div>
+                       <div class="modal-body">
+				    
+					   <div class="panel panel-primary">
+                    	  <div class="panel-heading">Founded Channels</div>
+                    	   <div style = "overflow: auto" id = "channelsList">
+                            <div class="list-group">	
+                    			
+                    			<form id="join" method='POST' action='#'>
+                    			  
+                    			  {% for item in findChannelsRes %}
+                    				
+                    			    <a href="{{ url_for('chat', channel = item.name ) }}" class="list-group-item">
+                                      <h4 class="list-group-item-heading">{{ item.name }}</h4>
+                                      <p class="list-group-item-text">{{ item.description }}</p>
+                                    </a>
+                    			  
+                    			  {% endfor %}
+                    			  	  
+                    			 </form> 
+                              </div>
+                            </div>
+                      	</div>
+                  </div>                  
+                </div>
+              </div>
+            </div>
+			
+	<script type="text/javascript">
+    $(window).load(function(){
+        $('#searchResults').modal('show');
+    });
+</script>
+   {% endif %}
+   
+   
+
+   
+ {% if findHistoryRes.count() > 0 %}
+    <!-- Modal For History Channel Search Results-->
+            <div class="modal fade" id="historyResults" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">History Search Results</h4>
+                      </div>
+                       <div class="modal-body">
+				    
+					   <div class="panel panel-primary">
+                    	  <div class="panel-heading">Founded in History: </div>
+                    	   <div style = "overflow: auto" id = "historyList">
+                            <div class="list-group">	
+                    			
+                    			<form>
+                    			  
+                    			  {% for item in findHistoryRes %}
+                    				
+									{{ item.post | safe }}
+                    			   
+                    			  
+                    			  {% endfor %}
+                    			  	  
+                    			 </form> 
+                              </div>
+                            </div>
+                      	</div>
+                  </div>                  
+                </div>
+              </div>
+            </div>
+			
+	<script type="text/javascript">
+    $(window).load(function(){
+        $('#historyResults').modal('show');
+    });
+</script>
+   {% endif %}
+   
+   
+{% endblock %}
+
+{% block title %} FlaskChat [{{ current_user.username }}]{% endblock %}
+{% block page_content %}
+   
+   <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            namespace = '/test'; // change to an empty string to use the global namespace
+
+            // the socket.io documentation recommends sending an explicit package upon connection
+            // this is specially important when using the global namespace
+            var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+            socket.on('connect', function() {
+			      $('#join').submit();		  
+				   
+            });
+
+            // event handler for server sent data
+            // the data is displayed in the "Received" section of the page
+            socket.on('my response', function(msg) {
+			    if (msg.data != "Connected")
+                $('#log').append(msg.data);
+				//Autoscroll to the end of Chat Panel
+				var elem = document.getElementById('log');
+                elem.scrollTop = elem.scrollHeight;
+            });
+
+			
+			
+            // handlers for the different forms in the page
+            // these send data to the server in a variety of ways
+            $('form#emit').submit(function(event) {
+                socket.emit('my event', {data: $('#emit_data').val()});
+                return false;
+            });
+			
+			
+			//Event on sending message to chat
+            $('form#broadcast').submit(function(event) {
+                socket.emit('my broadcast event', {data: $('#broadcast_data').val()});
+				//Clear MessageBox after sent
+				$('#broadcast_data').val('');
+                return false;
+            });
+			
+			//Event on joinig to the new channel
+            $('form#join').submit(function(event) {
+                socket.emit('join', {room: $('#join_room').val()});
+                return false;
+            });
+			
+            $('form#leave').submit(function(event) {
+                socket.emit('leave', {room: $('#leave_room').val()});
+                return false;
+            });
+            $('form#send_room').submit(function(event) {
+                socket.emit('my room event', {room: $('#room_name').val(), data: $('#room_data').val()});
+                return false;
+            });
+        });
+	
+	//Process Enter and Enter + Ctrl keys
+	$(document).ready(function(){
+	$('#room_data').keyup(function(e) {	
+	   var keyCode = (window.event) ? e.which : e.keyCode;
+	   if (keyCode === 13 && !e.ctrlKey) {
+	       //Delete unused "\n" at the end of message
+		   message = $('#room_data').val().slice(0,-1);
+		   //Delete all trailing spaces (check if there is only spaces)
+		   message = jQuery.trim(message);
+		   //Get new length of message 
+		   if(message.length > 0){
+		       //Replace all "\n" to "<br> in message"
+		       message =  message.replace(/\n/g, "<br />");
+			   //Make Chat Post
+			   message = makePost(message)
+			   //Make post with bootstrap wallet and correct autor name
+		       $('#room_data').val(message);
+		       //Send Message
+			   $('#send_room').submit();	 
+			   }
+			  $('#room_data').val('');
+			 
+	   }
+	   if (keyCode === 13 && e.ctrlKey) {
+	       $('#room_data').val($('#room_data').val() + '\n')
+		   //Autoscrol to the end of Message Panel
+		   var elem = document.getElementById('room_data');
+                elem.scrollTop = elem.scrollHeight;
+		   
+	   }
+	});
+ });
+		
+		
+		window.onload = function setChatSize() {
+            h = window.screen.availHeight / 1.7;
+			document.getElementById('log').style.height = h+"px";
+			document.getElementById('channelsList').style.height = h+"px";
+        };
+		
+		
+		makePost = function(postText) {
+		   var fullDate = new Date();
+           var twoDigitMonth = fullDate.getMonth()+"";if(twoDigitMonth.length==1)  twoDigitMonth="0" +twoDigitMonth;
+           var twoDigitDate = fullDate.getDate()+"";if(twoDigitDate.length==1) twoDigitDate="0" +twoDigitDate;
+           var currentDate = " " + twoDigitDate + "/" + twoDigitMonth + "/" + fullDate.getFullYear();
+		   
+		   var twoDigitHour = fullDate.getHours() + ""; if(twoDigitHour.length == 1) twoDigitHour="0" + twoDigitHour;
+		   var twoDigitMinute = fullDate.getMinutes() + ""; if(twoDigitMinute.length == 1) twoDigitMinute="0" + twoDigitMinute;
+		   var twoDigitSecond = fullDate.getSeconds() + ""; if(twoDigitSecond.length == 1) twoDigitSecond="0" + twoDigitSecond;
+		   		   
+		   var currentTime = twoDigitHour + ":" + twoDigitMinute + ":" +twoDigitSecond;
+		   
+		   return '<div class="panel panel-default"><div class="panel-heading">' +
+		          '<b>{{ current_user.username }}</b> commented on ' + currentTime + currentDate + 
+		          '</div><div class="panel-body">' +
+                  postText + '</div></div>';
+		
+		} 
+			
+			
+    </script>
+	
+	
+	
+	<table align="center" width="100%">
+    <tr> {# Channels Panel #}
+       <td rowspan="2" width="25%" ALIGN="left" VALIGN="TOP" style="padding:0 15px 0 15px;">
+	  <!--  -->	     
+	 <div class="panel panel-primary">
+	  <div class="panel-heading">Channels</div>
+	   <div style = "overflow: auto" id = "channelsList">
+        <div class="list-group">
+		    		
+			{# Switch between channels form #}
+			
+			<form id="join" method='POST' action='#'>
+			  
+			  {% for item in allChannels %}
+				
+			    <a href="{{ url_for('chat', channel = item.name ) }}" class="list-group-item">
+                  <h4 class="list-group-item-heading">{{ item.name }}</h4>
+                  <p class="list-group-item-text">{{ item.description }}</p>
+                </a>
+			  
+			  {% endfor %}
+			  
+			  <input type="hidden" name="join_room" id="join_room" value= {{ channel }}>
+			  
+			</form> 
+			
+        </div>
+      </div>
+	</div>
+
+       
+		 <!-- Buttons -->
+		   <div class="text-center">
+		    <div class="btn-group">
+			
+			 <!-- Refresh Channels Button-->
+			 <a class="btn btn-default" href="{{ url_for('chat', channel= channel) }}" role="button"> <span class="glyphicon glyphicon-refresh"></span></a>	 
+		    
+			
+		     <!-- Add New Channel Button-->			 
+		     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addChannel">
+             <span class="glyphicon glyphicon-plus"></span></button>		   
+		     
+			 <!-- Search Channels Button-->			 
+			 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#findChannel">
+             <span class="glyphicon glyphicon-search"></span></button>
+			 
+			 <!-- Search in Channel History-->			 
+			 <button type="button" class="btn btn-success" data-toggle="modal" data-target="#findHistory">
+             <span class="glyphicon glyphicon-th-list"></span></button>
+		    </div>
+		   </div>
+		
+		
+		    <!-- Modal For New Channel Creation-->
+            <div class="modal fade" id="addChannel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">New Channel</h4>
+                  </div>
+                  <div class="modal-body">
+				    <form name = "new_channel" id="new_channel" action= "{{ url_for('chat', channel = channel) }}" method="post">
+					   <b>Name:</b>
+					   <input class="form-control" type="text" name="channel_name" id="channel_name" placeholder="New Channel Name" value="" autofocus />
+					   <br>
+					   <b>Description:</b>
+                       <textarea class="form-control" style="resize: none;" name="channel_desc" id="channel_desc" rows= 2 placeholder="Description" vlaue=""></textarea>
+					   <br>					   
+					   <button type="submit" class="btn btn-primary">Create</button>						
+					 </form>
+                  </div>                  
+                </div>
+              </div>
+            </div>
+		
+		    
+			<!-- Modal For Chat Channel Search-->
+            <div class="modal fade" id="findChannel" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Find Channel</h4>
+                  </div>
+                  <div class="modal-body">
+				    <form name = "find_channel" id="find_channel" action= "{{ url_for('chat', channel = channel) }}" method="post">
+					   <b>Name:</b>
+					   <input class="form-control" type="text" name="search_name" id="search_name" placeholder="Channel Name Keyword" value="" autofocus />
+					   <br>					   					   
+					   <button type="submit" class="btn btn-primary">Find</button>						
+					 </form>
+                  </div>                  
+                </div>
+              </div>
+            </div>
+		
+		
+		   <!-- Modal For Search in Channel History-->
+            <div class="modal fade" id="findHistory" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Search in Channel History</h4>
+                  </div>
+                  <div class="modal-body">
+				    <form name = "find_history" id="find_history" action= "{{ url_for('chat', channel = channel) }}" method="post">
+					   <b>Keyword:</b>
+					   <input class="form-control" type="text" name="search_history" id="search_history" placeholder="Keyword in Channel History" value="" autofocus />
+					   <br>					   					   
+					   <button type="submit" class="btn btn-primary">Search</button>						
+					 </form>
+                  </div>                  
+                </div>
+              </div>
+            </div>
+		
+		
+	   </td>	 
+	   	 
+       <td>{# Chat Panel #}
+	   <div class="panel panel-primary">
+	     <div class="panel-heading">Channel: {{ channel }}</div>
+          <div style = "overflow: auto" class="panel-body" id = 'log'>
+		  
+		  {% for item in lastPosts %}
+		      {{ item.post | safe }}
+		  {% endfor %}
+		  
+        </div>
+	   </div>
+	  </td>
+    </tr>
+	
+	
+    <tr> 
+     <td>{# Message Panel #}
+    <form id="send_room" method='POST' action='#'>
+	      <div class="form-group">
+               <textarea class="form-control" style="resize: none;" name="room_data" id="room_data" rows= 3 placeholder="Message (Ctrl + Enter for new line)"></textarea>
+			   <input type="hidden" name="room_name" id="room_name" value="{{ channel }}">
+	      </div>
+    </form>
+	</td>
+    </tr>
+   </table>
+    
+{% endblock %}

@@ -1,0 +1,17 @@
+<html>
+<title></title>
+<body>
+Hi!
+</br>
+Welcome on Sudoku gaming site!
+</br>
+<table>
+<tr><td>Your login: <b>{{ email }}</b></td></tr>
+<tr><td>Your pass: <b>{{ password }}</b></td></tr>
+</table>
+Happy playing!
+</br>
+</br>
+Any questions: <b>sudokugaming@gmail.com</b>
+</body>
+</html>

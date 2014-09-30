@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Registration{% endblock %}
+
+
+{% block links %}
+
+{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+
+<h4>
+<table width="500" height="500" align="center">
+<tr>
+ <td> {{ wtf.quick_form(form) }} 
+ <br /><h4><a href="{{ url_for('login') }}">[ Log In ]</a></h4></td>
+</tr>
+</table>
+
+</h4>
+</div>
+{% endblock %}
