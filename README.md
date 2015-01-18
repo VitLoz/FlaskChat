@@ -6,7 +6,7 @@ Resolve requrments.txt and create all OS variables in app.py file with correspon
 http://flaskchat.pythonanywhere.com
 
 Technologies:
-Language: Python, JavaScript, jQuery, Jinja2, SQLAlchemy
+Language: Python 2.x, JavaScript, jQuery, Jinja2, SQLAlchemy
 Web Framework: Flask with extensions, Bootstrap
 Database: MySQL
 
