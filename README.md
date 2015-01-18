@@ -11,7 +11,7 @@ Web Framework: Flask with extensions, Bootstrap
 Database: MySQL
 
 Functionality:
-1. Registration of new user цшер у-ьфшд congratulations
+1. Registration of new user with e-mail congratulations
 2. Creation of new chat channel
 3. Searcing of chat channels
 4. Connection to chat channel
