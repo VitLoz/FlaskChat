@@ -7,9 +7,14 @@ http://flaskchat.pythonanywhere.com
 
 Technologies:
 Language: Python, JavaScript, jQuery, Jinja2, SQLAlchemy
-Web Framework: Flask, Bootstrap
+Web Framework: Flask with extensions, Bootstrap
 Database: MySQL
 
 Functionality:
-1. Registration of new user
-2. 
+1. Registration of new user цшер у-ьфшд congratulations
+2. Creation of new chat channel
+3. Searcing of chat channels
+4. Connection to chat channel
+5. Adding of new messages to the current chat channel
+6. Search in chat channel
+7. Logout
