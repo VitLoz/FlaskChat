@@ -15,7 +15,7 @@ Database: MySQL
 
 Functionality:
 
-1. Registration of new user with e-mail congratulations
+1. Registration of new user with e-mail congratulation
 
 2. Creation of new chat channel
 
